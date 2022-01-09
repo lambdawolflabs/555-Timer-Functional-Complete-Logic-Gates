@@ -18,7 +18,8 @@ Purpose: 2 bit ripple-carry adder using nothing but 556s timer chips ( 2bits x (
 
 Specs:
 
-	-Room Temp Operation (25C +/-10C) 
+	-Room Temp Operation (25C +/-10C)
+	-5VDC Operation (~180mA peak)
 	-Powered by bench power supply with binding posts or hooks (reverse protection MOSFET included)
 	-NO explicit ESD protection.
 
