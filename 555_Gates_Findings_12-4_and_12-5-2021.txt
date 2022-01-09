@@ -1,0 +1,177 @@
+555 Based Gates:
+
+Highly recommend to use CMOS based 555s (e.g TLC555) for both speed and power savings. Bipolar should work, but will be slower and more power hungry.
+
+Additionally going with a CMOS based 555 will result in higher resistances for the internal resistor ladder (which'll be important for some two input single 555 gate designs later that use the CONTROL pin as one of the inputs).
+
+CMOS based 555s have internal resistor ladders of on the order of 100kOhm for each resistor approximately whereas BJT based 555s are closer to single digit (~5kOhm) for each resistor. Heck, you could even use a 555 as a wide tolerance resistor if needed.
+
+
+
+
+SUMMARY:
+Number of 555s required to make each gate (two input assumed):
+	-True NOR Gate (CMOS input, NMOS output): 2
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull: 270nSec
+	
+	-True AND Gate (CMOS input, NMOS output): 2
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull: 270nSec
+	
+	-AND Gate w/ One Input Inverted (CMOS input, CMOS output): 1
+		-Estimated Tpd on TLC555: 600nSec
+	
+	-True Inverter (CMOS input, CMOS output): 1
+		-Estimated Tpd on TLC555: 244nSec
+		
+	-True Non Inverting Buffer (CMOS input, CMOS output): 1
+		-Estimated Tpd on TLC555: 430nSec
+	
+	-True OR Gate (CMOS Input, CMOS output): 3 (True NOR Gate feeding into a True Inverter)
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull for mid stage: 520nSec	
+	
+	-True NAND Gate (CMOS input, CMOS output): 3 (Tru AND Gate feeding into a True Inverter)
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull for mid stage: 520nSec	
+
+	-True XOR Gate (CMOS Input, NMOS output): 6 (True NOR Gate + the two freebie inverters inherent to it which invert the A and B inputs. The inverted A and B feed from the first stage feed into another True NOR Gate stage. The first stage True NOR output feeds into one of the inputs for the third stage true NOR gate. The other input of the third stage True NOR gate is feed from the second stage True NOR's output)
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull for intermediate and output NMOS stages: 810nSec	
+
+	-True XNOR Gate (CMOS input, CMOS output): 8 (Using True NOR Gates, see the how XNORs are constructed with NOR gates, inverters can be used too)
+		-Estimated WC Tpd on TLC555 with 100Ohm Pull for intermediate and output NMOS stages: 784nSec		
+
+	-Safe RS Flip Flop (CMOS Inputs, CMOS output): 1
+		-Estimated Tpd on TLC555: 244nSec
+		
+	-True Clocked D Flip Flop (CMOS Inputs, CMOS outputs): 7  (1 AND with inv input, 2 NOTs, 1 OR, & 1 RS FF 555)
+	
+	
+	
+	
+	-Two Input Mux (One Input Inverted, CMOS INPUTS, NMOS Output): 2
+	
+	
+In order to build a 74HC181 4-bit ALU using 555s, it would take approximately 215 total 555s
+
+In order to build a single 1 bit full adder using 555s it would take 8 555s
+
+In order to build a single 1 bit full subtractor using 555s it would take 7 555s
+
+Note: A full adder and a full subtractor can share a common XOR gate
+
+In order to build an 8 bit full adder using 555s it would take 64   555s
+
+In order to build an 8 bit full subtractor using 555s it would take w  555s
+
+In order to build a single 74HC4511 BCD to Seven Seg Decoder it would take 87  555s
+
+
+
+
+
+
+Two Input Two 555s NOR Gate CMOS/NMOS Style:
+	-CMOS Inputs
+	-NMOS Style/Technology Output
+	-Two 555s required
+	-On each 555 tie their Threshold & Trigger pins together, this becomes an input. Thus a two input NOR gate for two 555s
+	-Both RESETs must be tied to VCC.
+	-Both CONTROL pins must be left floating or decoupled.
+	-The output stage pull up can be anything as long as it respects the maximum current draw of the DISCHARGE pin (e.g. 150mA for CMOS based 555s on their DISCHARGE pin, at 5V this is a 33Ω resistor, recommend to be slightly higher at the minimum like a 47Ω. Of course for power savings, you should increase this resistor value whilst respecting the propagation time of the gate required).
+	-Both DISCHARGE pins of each 555 will be the open drain NFETs that'll pull the pull up low.
+	-Thus this is now a NMOS based NOR Gate
+	-You still have each independent 555s OUTPUT pins, thus this NOR gate can also serve / provide two free CMOS Style/Technology Inverter outputs of each input.
+	
+	-Using a 100Ω as the output pull up resistor, two TLC555CPs, 150kHz pulse train on the input, 10x passive scope probe on the DISCHARGEs output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to GND, I measured a worst case Tpd (across both inputs and both edges) of: 270nSec
+
+
+Four Input Two 555s NOR Gate CMOS/NMOS Style:
+	-Same everything as the Two Input Two 555s NOR Gate however now the two RESETs will be used as additional (albeit inverted) inputs.
+
+	-Using a 100Ω as the output pull up resistor, two TLC555CPs, 150kHz pulse train on the input, 10x passive scope probe on the DISCHARGEs output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to GND, I measured a worst case Tpd (across both RESET inputs and both edges) of: 384nSec
+	
+
+
+Two Input Two 555s AND Gate CMOS/NMOS Style:
+	-CMOS Inputs
+	-NMOS Style/Technology Output
+	-Two 555s required
+	-On each 555 tie their Threshold & Trigger pins together and then tie them to ground.
+	-Both RESETs become your A and B inputs.
+	-Both CONTROL pins must be left floating or decoupled.
+	-The output stage pull up can be anything as long as it respects the maximum current draw of the DISCHARGE pin (e.g. 150mA for CMOS based 555s on their DISCHARGE pin, at 5V this is a 33Ω resistor, recommend to be slightly higher at the minimum like a 47Ω. Of course for power savings, you should increase this resistor value whilst respecting the propagation time of the gate required).
+	-Both DISCHARGE pins of each 555 will be the open drain NFETs that'll pull the pull up low.
+	-Thus this is now a NMOS based AND Gate
+	-You still have each independent 555s OUTPUT pins, thus this AND gate can also serve / provide two free CMOS Style/Technology Buffer outputs of each input.
+	
+	-Using a 100Ω as the output pull up resistor, two TLC555CPs, 150kHz pulse train on the input, 10x passive scope probe on the DISCHARGEs output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to VCC, I measured a worst case Tpd (across both inputs and both edges) of: 270nSec
+
+
+	
+
+
+One 555 Inverter CMOS Style:
+	-CMOS Style/Technology Inputs & Outputs
+	-One 555 required
+	-Tie the Threshold and Trigger pins together, this becomes the input.
+	-Tie the RESET pin to VCC.
+	-Leave the CONTROL pin floating or decoupled.
+	-The OUTPUT pin will be the inverted CMOS style/technology output stage.
+	-Additionally the spare DISCHARGE pin can be used as an NMOS style technology inverted output stage independently.
+	
+	-Using a TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, I measured a worst case Tpd (across both edges) of: 244nSec
+	
+	
+	
+
+One 555 AND Gate (One input inverted) CMOS Style:
+	-CMOS Style/Technology Inputs & Outputs
+	-One 555 required
+	-Tie the Threshold pin to VCC.
+	-Tie the RESET pin to VCC.
+	-The CONTROL pin will be input A, CMOS style input (but with embedded high resistance pull-up and pull-down resistors by 555 design).
+	-The TRIGGER pin will be input B, CMOS style input.
+	-The OUTPUT pin will be the AND Gate output CMOS style/technology output stage.
+	-Additionally the spare DISCHARGE pin can be used as an NMOS style technology CMOS output stage independently.
+	
+	-One TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to a either rail, I measured a worst case Tpd (across both inputs and both edges) of: 600nSec
+	
+	
+	
+NOT RECOMMENDED FOR FAST SYSTEMS: One 555 SLOW OR Gate (One input inverted) CMOS Style:
+	-CMOS Style/Technology Inputs & Outputs
+	-One 555 required
+	-Tie the TRIGGER pin to GND.
+	-Tie the RESET pin to VCC.
+	-The CONTROL pin will be input A, CMOS style input (but with embedded high resistance pull-up and pull-down resistors by 555 design).
+	-The THRESHOLD pin will be input B, CMOS style input.
+	-The OUTPUT pin will be the OR Gate output CMOS style/technology output stage.
+	-Additionally the spare DISCHARGE pin can be used as an NMOS style technology CMOS output stage independently.
+	
+	-Note: This gate is EXTREMELY slow when the toggling signal is THRESHOLD.
+		-One TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to a either rail, I measured a worst case Tpd (across both edges) of: 450milliSec
+		
+	-When the toggling signal is CONTROL (and THRESHOLD is tied to VCC), its back to the normal speeds faster:
+		-One TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, the other input being tied to a either rail, I measured a worst case Tpd (across both inputs and both edges) of: 450nSec
+	
+	
+	
+One 555 Non-Inverting Buffer CMOS Style:
+	-Same everything as the One 555 AND Gate however now the TRIGGER pin is tied to GND. CONTROL is the only input.
+
+	-One TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, I measured a worst case Tpd (across both edges) of: 430nSec
+	
+	
+	
+One 555 RS Flip Flop CMOS Style:
+	-CMOS Style/Technology Inputs & Outputs
+	-One 555 required
+	-Trigger is the SET(bar) input.
+	-Threshold is the RESET input.
+	-Tie the RESET pin to VCC.
+	-Leave the CONTROL pin floating or decoupled.
+	-The OUTPUT pin will be the internal state CMOS style/technology output stage.
+	-Additionally the spare DISCHARGE pin can be used as an NMOS style technology output stage independently.
+	
+	-Using a TLC555CP, 150kHz pulse train on the input, 10x passive scope probe on the OUTPUT output (approx 90pF Cload, probe+scope), 5V VCC at 25C, I measured a worst case Tpd (across both edges) of: 244nSec
+	
+	
+	
